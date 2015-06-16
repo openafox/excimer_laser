@@ -1,0 +1,41 @@
+OFF:0	Laser is OFF 
+OFF:1	Interlock XXX  
+OFF:2	Preset Energy too High  
+OFF:3	Fatal Error, Watchdog 
+OFF:4	Fatal Error, Watchdog 
+OFF:5	Fatal Error, LWL-Datalink 
+OFF:6	Polling 
+OFF:7	Energy Cal. Error  
+OFF:8	New Gas Fill Needed 
+OFF:9	No Vacuum  
+OFF:10	Low Pressure 
+OFF:11	No Capacity Left  
+OFF:12	Error Temperature Measurement 
+OFF:13	Fluorine Valve not Opened 
+OFF:21	Warm-up 8min 
+OFF:26	Low Light 
+OFF:27	Wrong Pressure 
+OFF:29	RAM Check Error 
+OFF:31	Timeout 
+OFF:33	Halogen Pressure too High 
+OFF:35	Not Available 
+OFF:39	Inert Valve Closed 
+OFF:41	OFF:41
+ON:0    Laser on, no warning or message 
+ON:2    PRESET ENERGY TOO HIGH  
+ON:03   Duly Cycle Exceeded 
+ON:8    New Gas Fill Needed 
+ON:9    No Vacuum 
+ON:10   Low Pressure 
+ON:13   FFluorine Valve not Opened 
+ON:34   HI in preparation 
+ON:36   COD on 
+ON:37   COD on at a repetition ra1e>50 Hz 
+ON:40   Preset Energy Too Low 
+FLUSHING LEAKTEST:3 No Gas Flow 
+FLUSHING LEAKTEST CONT:30   Leak!-Check Windows 
+NEW FILL:3  No Gas Flow 
+PASSIVATION FILL:3  No Gas Flow 
+PURGE RESERVOIR:3   No Gas Flow 
+SAFETY FILL:3   No Gas Flow
+TRANSPORT FILL:3    No Gas Flow
