@@ -4,6 +4,8 @@ import sys  # list of comand line argus need to run Gui
 import fakeSerial as serial           # use this if not connected to serial
 import LaserGUI
 import time        # yep importing time that way we can go back to the future
+import threading
+
 # Setup Global stop variables
 laser_on = ""    # 1 = stop laser
 motor_on = 0    # 1 = stop motor
@@ -99,13 +101,15 @@ class APP(LaserGUI.gui):
 # On Motor Button click
     def motor_click(self):
         global motor_on
-        self.update_guiVars()
+        self.up_motor()
         sending_button = self.sender()
         text = sending_button.text()
 
         if text[0:5] == "Stop!":
-            self.statusbar.showMessage("Motor Running....")
             self.motor_init()
+            # self.statusbar.showMessage("Motor Running....")
+            thread1 = threading.Thread(target=self.motor_init)
+            thread1.start
             motor_out = "for"
             self.motor_run(motor_out)
         else:
@@ -526,22 +530,13 @@ class APP(LaserGUI.gui):
 
 # Initialize Motor
     def motor_init(self):
-        self.motor_cmd("HR")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("ME")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("AR")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("SC")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("CM21")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("AC25")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("DE25")
-        QtGui.QApplication.processEvents()
-        self.motor_cmd("EG1600")
-    # print "motor done"
+        self.motor_ser.open()           # open the serial port
+        cmds = ["HR", "ME", "AR", "SC", "CM21", "AC25","DE25", "EG1600"]
+        for cm in cmds:
+            print cm
+            self.motor_ser.write(cm)
+            result = self.motor_ser.readline()
+        self.motor_ser.close()          # close the serial port
 
 # start it all up
 if __name__ == "__main__":
