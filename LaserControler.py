@@ -183,28 +183,25 @@ class APP(LaserGUI.gui):
             self.laser_cmd('MODE=EGY NGR')
             iterations = 0
             i = 0
-            if self.chck_on() == "on":   # start laser continue ifs on
-                self.PLID_loop(iterations, i)
+            self.chck_on()  # start laser continue ifs on
     # Laser NRG Controlled
         elif laser_on == "NRG":
             self.laser_cmd('MODE=EGY NGR')
             self.laser_cmd('REPRATE=%d' % AllGuiVars["EGY_frq"])
             self.laser_cmd('EGY=%d' % AllGuiVars["EGY_NRG"])
-            if self.chck_on() == "on":  # start laser continue if on
-                self.laser_P_check()
+            self.chck_on()
     # Laser Volt Controlled
         elif laser_on == "Volt":
             self.laser_cmd('MODE=HV')
             self.laser_cmd('REPRATE=%d' % AllGuiVars["Volt_frq"])
             self.laser_cmd('HV=%d' % AllGuiVars["Volt_HV"])
-            if self.chck_on() == "on":  # start laser only continue if on
-                self.laser_P_check()
+            self.chck_on()
                 # run the laser loop (Keeps it running / does plid)
     # New Fill
         elif laser_on == 'Fill':
             reply = QtGui.QMessageBox.question(
                     self, 'Message',
-                    "Tank is open, Buffer line is flushed,
+                    "Tank is open, Buffer line is flushed, \
                     and you are ready for a new fill?",
                     QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                     QtGui.QMessageBox.No
@@ -282,19 +279,33 @@ class APP(LaserGUI.gui):
 
             # start a message box that counts down
             # allow the laser to warm up for 100 sec
-            self.CountDownMsg("Pressing Abort will cancle the warm up. \
+            self.CountDownMsg("Pressing Abort will cancel the warm up. \
                               <br> Warming Up For: ", 100)
 
             # start the energy cal (Laser is still running)
-            self.laser_cmd('ENERGY CAL')
-            out, ok = QtGui.QInputDialog.getInt(
+            self.laser_cmd('OPMODE=OFF')
+            QtCore.QTimer.singleShot(5000, self.EGY_CAL_CON)
+
+    def EGY_CAL_CON(self):
+        global laser_on
+        self.laser_cmd('OPMODE=ENERGY CAL')
+        laser_on = 'Cal'
+        self.ECON_check()
+            #QtCore.QTimer.singleShot(250, self.laser_P_check)
+        out, ok = QtGui.QInputDialog.getInt(
                     self, "Energy Calibration",
                     "Please enter measured energy:", 300, 1, 400)
-            if ok:
+        if ok:
                 self.laser_cmd('EGY=%d' % out)
-            super(APP, self).ChangeButton(laser_on, "Stop")
-            laser_on = ""
-
+        super(APP, self).ChangeButton(laser_on, "Stop")
+        laser_on = ""
+    def ECON_check(self, test=0):
+        if laser_on != "":
+            self.laser_act_nrg.display(self.laser_cmd('EGY?'))
+            out = self.laser_cmd('OPMODE?')
+            self.laser_messages.setPlainText(out)
+            QtCore.QTimer.singleShot(500, self.ECON_check)
+            # stop if laser is not on or button is pressed
 # make message box that runs a count down
     def CountDownMsg(self, Msg, duration=10):
         global laser_on
@@ -402,66 +413,69 @@ class APP(LaserGUI.gui):
 
 # Check laser parameters
     def laser_P_check(self):
-        # Send output of laser_cmd to displays
-        self.laser_tpress.display(self.laser_cmd('PRESSURE?'))
         # stop if laser is not on or button is pressed
         # if laser returns off turn off the loop (but lets run for OFF, Wait)
         if laser_on == "":
             self.laser_stop()
             return
         else:
+            # Send output of laser_cmd to displays
+            self.laser_tpress.display(self.laser_cmd('PRESSURE?'))
             # print "Main Laser " + str(time.time())   # learn how long takes
             QtCore.QTimer.singleShot(250, self.laser_O_check)
             QtCore.QTimer.singleShot(500, self.laser_E_check)
 
     def laser_E_check(self):
-        self.laser_act_nrg.display(self.laser_cmd('EGY?'))
         # stop if laser is not on or button is pressed
         # if laser returns off turn off the loop (but lets run for OFF, Wait)
         if laser_on == "":
             self.laser_stop()
             return
         else:
+            self.laser_act_nrg.display(self.laser_cmd('EGY?'))
             # print "Main Laser " + str(time.time())  # learn how long takes
             QtCore.QTimer.singleShot(250, self.laser_O_check)
             QtCore.QTimer.singleShot(500, self.laser_H_check)
 
     def laser_H_check(self):
-        self.laser_act_volt.display(self.laser_cmd('HV?'))
         # stop if laser is not on or button is pressed
         # if laser returns off turn off the loop (but lets run for OFF, Wait)
         if laser_on == "":
             self.laser_stop()
             return
         else:
+            self.laser_act_volt.display(self.laser_cmd('HV?'))
             # print "Main Laser " + str(time.time())   # learn how long takes
             QtCore.QTimer.singleShot(250, self.laser_O_check)
             QtCore.QTimer.singleShot(500, self.laser_R_check)
 
     def laser_R_check(self):
-        self.laser_act_frq.display(self.laser_cmd('REPRATE?'))
         # stop if laser is not on or button is pressed
         if laser_on == "":
             self.laser_stop()
             return
-        else:
+        else:        
+            self.laser_act_frq.display(self.laser_cmd('REPRATE?'))
             # print "Main Laser " + str(time.time()) # learn how long takes
             QtCore.QTimer.singleShot(250, self.laser_O_check)
             QtCore.QTimer.singleShot(500, self.laser_P_check)
 
-    def laser_O_check(self):
-        out = self.laser_cmd('OPMODE?')
-        # if laser returns off turn off the loop (but lets run for OFF, Wait)
-        if out[0:4] == "OFF:" or laser_on == "":
-            self.laser_stop(False)      # no need to kill it's already dead
-        # if the code is new check the message meaning and print to the display
-        txt = str(self.laser_messages.toPlainText())
-        if txt.find(out) == -1:
-            # print "True"
-            self.laser_mess_con(out)
-        else:
-            self.laser_messages.setPlainText(out)
-    # stop if laser is not on or button is pressed
+    def laser_O_check(self, test=0):
+        if laser_on != "":
+            out = self.laser_cmd('OPMODE?')
+            # if laser returns off turn off the loop (but lets run for OFF, Wait)
+            if out[0:4] == "OFF:":
+                self.laser_stop(False)      # no need to kill it's already dead
+            # if the code is new check the message meaning and print to the display
+            txt = str(self.laser_messages.toPlainText())
+            if txt.find(out) == -1:
+                # print "True"
+                self.laser_mess_con(out)
+            else:
+                self.laser_messages.setPlainText(out)
+        if test == 1:
+            QtCore.QTimer.singleShot(500, self.laser_O_check)
+            # stop if laser is not on or button is pressed
 
 # Laser messages - convet to real meaning
     def laser_mess_con(self, code):
@@ -538,7 +552,7 @@ class APP(LaserGUI.gui):
 
 # Initialize Motor
     def motor_init(self):
-        # self.motor_cmd("HR")
+        self.motor_cmd("HR")
         QtGui.QApplication.processEvents()
         self.motor_cmd("ME")
         QtGui.QApplication.processEvents()
