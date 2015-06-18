@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import sys  # list of comand line argus need to run Gui
-# import serial             # will error if not connected to laser and motor
-import fakeSerial as serial           # use this if not connected to serial
+import serial             # will error if not connected to laser and motor
+# import fakeSerial as serial           # use this if not connected to serial
 import LaserGUI
 import time        # yep importing time that way we can go back to the future
 import threading
@@ -106,10 +106,8 @@ class APP(LaserGUI.gui):
         text = sending_button.text()
 
         if text[0:5] == "Stop!":
+            self.statusbar.showMessage("Motor Running....")
             self.motor_init()
-            # self.statusbar.showMessage("Motor Running....")
-            thread1 = threading.Thread(target=self.motor_init)
-            thread1.start
             motor_out = "for"
             self.motor_run(motor_out)
         else:
@@ -127,6 +125,7 @@ class APP(LaserGUI.gui):
         if reply == QtGui.QMessageBox.Yes:
             self.motor_cmd("MD")
             self.motor_cmd("QT")
+            print "motor done"
             event.accept()
         else:
             event.ignore()
@@ -534,8 +533,10 @@ class APP(LaserGUI.gui):
         cmds = ["HR", "ME", "AR", "SC", "CM21", "AC25","DE25", "EG1600"]
         for cm in cmds:
             print cm
-            self.motor_ser.write(cm)
+            run_cmd = str(cm).strip() + "\r"
+            self.motor_ser.write(run_cmd)
             result = self.motor_ser.readline()
+            print result
         self.motor_ser.close()          # close the serial port
 
 # start it all up
