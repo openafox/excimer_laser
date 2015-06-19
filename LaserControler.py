@@ -5,12 +5,13 @@ import serial             # will error if not connected to laser and motor
 import LaserGUI
 import time        # yep importing time that way we can go back to the future
 import threading
+from Queue import Queue
 
 # Setup Global stop variables
 laser_on = ""    # 1 = stop laser
-motor_on = 0    # 1 = stop motor
+motor_on = True    # 1 = stop motor
 AllGuiVars = {}  # initialize All Vars dictionary
-
+mot_spd = Queue()
 
 class APP(LaserGUI.gui):
     """"This Class is used to create the Gui for the laser and
@@ -27,6 +28,7 @@ class APP(LaserGUI.gui):
         self.laser_ser.close()
         self.motor_ser = serial.Serial('COM3', 9600, timeout=0.01)
         self.motor_ser.close()
+        print threading.current_thread() 
 
     def run(self):
         global laser_on
@@ -107,12 +109,14 @@ class APP(LaserGUI.gui):
 
         if text[0:5] == "Stop!":
             self.statusbar.showMessage("Motor Running....")
-            self.motor_init()
-            motor_out = "for"
-            self.motor_run(motor_out)
+            cmds = ["HR", "ME", "AR", "SC", "CM21", "AC25","DE25", "EG1600",
+                    "VE%s" % AllGuiVars["spd"], "FL-5236", "SSb"]
+            motor_on = True
+            thread1 = threading.Thread(target=self.motor_start, args=(cmds,))
+            thread1.start()
         else:
             self.statusbar.showMessage("Motor Off")
-            motor_on = 1
+            motor_on = False
 
 # ###            Capture Close and do Stuff          ####
     def closeEvent(self, event):
@@ -490,54 +494,64 @@ class APP(LaserGUI.gui):
         # repeat in 1 sec motor is spinning so it should be fine
         QtCore.QTimer.singleShot(1000, self.ms_loop)
 
-    def ms_loop(self):
-        global motor_on
-        motor_out = self.motor_ser.readline()
-        # QtGui.QApplication.processEvents()      #allow other stuff to happen
-        # print 'out: %s' %motor_out     #for debug
-        motor_out = motor_out.strip()
-        if motor_on == 1:
-            self.motor_ser.close()
-            # stop kill add if we want to stop the motor instantly
-            # self.motor_cmd("SK")
-            motor_on = 0
-            self.motor_cmd("MD")  # set motor to free spin
-        elif motor_out != "":
-            QtCore.QTimer.singleShot(10, lambda: self.motor_run(motor_out))
-            # print motor_out  + "-" + str(time.time())
-        else:
-            QtCore.QTimer.singleShot(10, self.ms_loop)
 
     def motor_cmd(self, cmd):
+
+        print threading.current_thread() 
         # print the time and date to the terminal
-        self.emit(QtCore.SIGNAL('apphistory(QString)'),
-                  time.strftime('%y-%m-%d %H:%M:%S'))
+        # self.emit(QtCore.SIGNAL('apphistory(QString)'),
+        #          time.strftime('%y-%m-%d %H:%M:%S'))
         run_cmd = str(cmd).strip() + "\r"
         # send signal to writ to app history
-        self.emit(QtCore.SIGNAL('apphistory(QString)'),
-                  "Motor SEND: %s" % str(cmd).strip())
-        # print "Motor SEND: %s" % cmd.strip()       #for debug
+        # self.emit(QtCore.SIGNAL('apphistory(QString)'),
+        #          "Motor SEND: %s" % str(cmd).strip())
+        print "Motor SEND: %s" % str(cmd).strip()       #for debug
         self.motor_ser.open()           # open the serial port
         self.motor_ser.write(run_cmd)
         result = self.motor_ser.readline()
         self.motor_ser.close()          # close the serial port
         # send signal to writ to app history
-        self.emit(QtCore.SIGNAL('apphistory(QString)'),
-                  "Motor RECV: %s" % str(result).strip())
-        # print "Motor RECV: %s" % result.strip()    #for debug
+        # self.emit(QtCore.SIGNAL('apphistory(QString)'),
+        #          "Motor RECV: %s" % str(result).strip())
+        print "Motor RECV: %s" % result.strip()    #for debug
         return result.strip()
 
-# Initialize Motor
-    def motor_init(self):
-        self.motor_ser.open()           # open the serial port
-        cmds = ["HR", "ME", "AR", "SC", "CM21", "AC25","DE25", "EG1600"]
-        for cm in cmds:
-            print cm
-            run_cmd = str(cm).strip() + "\r"
-            self.motor_ser.write(run_cmd)
-            result = self.motor_ser.readline()
-            print result
-        self.motor_ser.close()          # close the serial port
+# Start Motor
+    def motor_start(self, cmds):
+        global motor_on
+        motor_out = ""
+        print threading.current_thread() 
+        while len(cmds) >= 1:
+            # run_cmd = str(cmds[0]).strip() + "\r"
+            # self.motor_ser.open()           # open the serial port
+            # self.motor_ser.write(run_cmd)
+            # result = self.motor_ser.readline()
+            # self.motor_ser.close()          # close the serial port
+            #print run_cmd
+            #  print result
+            self.motor_cmd(cmds[0])
+            cmds.pop(0)
+        while motor_on:
+            self.motor_ser.open()
+            while motor_out == "" and motor_on:
+                motor_out = self.motor_ser.read()
+                # motor_out = self.motor_ser.readline(None, '\r')
+                motor_out = motor_out.strip()
+                # print "motor_out: ", motor_out, motor_on
+            self.motor_ser.close()
+            if motor_out == "f" and motor_on:
+                self.motor_cmd("FL-5236")
+                self.motor_cmd("SSb")
+                motor_out = ""
+            elif motor_out == "b" and motor_on:
+                self.motor_cmd("FL5236")
+                self.motor_cmd("SSf")
+                motor_out = ""
+
+        # stop kill add if we want to stop the motor instantly
+        # self.motor_cmd("SK")
+        self.motor_cmd("MD")  # set motor to free spin
+
 
 # start it all up
 if __name__ == "__main__":
