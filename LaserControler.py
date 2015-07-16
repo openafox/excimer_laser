@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import sys  # list of comand line argus need to run Gui
-import serial             # will error if not connected to laser and motor
-# import fakeSerial as serial           # use this if not connected to serial
+# import serial             # will error if not connected to laser and motor
+import fakeSerial as serial           # use this if not connected to serial
 import LaserGUI
 import time        # yep importing time that way we can go back to the future
 import threading
@@ -11,6 +11,7 @@ laser_on = ""    # 1 = stop laser
 motor_on = True    # 1 = stop motor
 AllGuiVars = {}  # initialize All Vars dictionary
 lock = threading.Lock()
+
 
 class APP(LaserGUI.gui):
     """"This Class is used to create the Gui for the laser and
@@ -25,9 +26,9 @@ class APP(LaserGUI.gui):
         # initialize the serial connections
         self.laser_ser = serial.Serial('COM4', 9600, timeout=0.1)
         self.laser_ser.close()
-        self.motor_ser = serial.Serial('COM3', 9600, timeout=0.01)
+        self.motor_ser = serial.Serial('COM3', 9600, timeout=0.1)
         self.motor_ser.close()
-        print threading.current_thread() 
+        print threading.current_thread()
 
     def run(self):
         global laser_on
@@ -109,8 +110,8 @@ class APP(LaserGUI.gui):
 
         if text[0:5] == "Stop!":
             self.statusbar.showMessage("Motor Running....")
-            cmds = ["HR", "ME", "AR", "SC", "CM21", "AC25","DE25", "EG1600",
-                    "VE%s" % AllGuiVars["spd"], "FL-5236", "SSb"]
+            cmds = ["HR", "ME", "AR", "SC", "CM21", "AC25", "DE25", "EG1100",
+                    "VE%s" % AllGuiVars["spd"], "FL-3600", "SSb"]
             motor_on = True
             thread1 = threading.Thread(target=self.motor_start, args=(cmds,))
             thread1.start()
@@ -137,7 +138,7 @@ class APP(LaserGUI.gui):
 # ##             Update variables     #####
     def up_motor(self):
         global AllGuiVars
-        AllGuiVars["spd"] = self.motor_spd.value()
+        AllGuiVars["spd"] = self.motor_spd.value()*36/11
 
     def up_EGY(self, val=1, send=True):  # val =place holder for val from box
         global AllGuiVars
@@ -474,32 +475,12 @@ class APP(LaserGUI.gui):
         return txt
 
 # run The Motor
-    def motor_run(self, motor_out):
-        global motor_on
-        global AllGuiVars
-        half_turn = 5236  # =1600/11*36  total in 360 / smallsprk * largesprok
-        self.motor_ser.close()     # make sure the serial connection is closed
-        self.motor_cmd("VE%s" % AllGuiVars["spd"])
-        QtGui.QApplication.processEvents
-        # print motor_out
-        if motor_out == "for":
-            self.motor_cmd("FL-%d" % half_turn)
-            QtGui.QApplication.processEvents
-            self.motor_cmd('SSbac')
-        elif motor_out == "bac":
-            self.motor_cmd("FL%d" % half_turn)
-            QtGui.QApplication.processEvents
-            self.motor_cmd('SSfor')
-        self.motor_ser.open()
-        # repeat in 1 sec motor is spinning so it should be fine
-        QtCore.QTimer.singleShot(1000, self.ms_loop)
-
 
     def motor_cmd(self, cmd, out="print"):
 
         run_cmd = str(cmd).strip() + "\r"
 
-        if not lock.aquire(False):    # for threading to prevent issues
+        if not lock.acquire(False):    # for threading to prevent issues
             mes = "Please stop motor befor sending command"
             if out == "display":
                 self.emit(QtCore.SIGNAL('apphistory(QString)'), mes)
@@ -512,34 +493,35 @@ class APP(LaserGUI.gui):
             self.motor_ser.close()          # close the serial port
             lock.release()
 
-        if out == "display":
-            print threading.current_thread() 
-            # print the time and date to the terminal
-            self.emit(QtCore.SIGNAL('apphistory(QString)'),
-                      time.strftime('%y-%m-%d %H:%M:%S'))
-            # send signal to writ to app history
-            self.emit(QtCore.SIGNAL('apphistory(QString)'),
-                      "Motor SEND: %s" % str(cmd).strip())
-            # send signal to writ to app history
-            self.emit(QtCore.SIGNAL('apphistory(QString)'),
-                      "Motor RECV: %s" % str(result).strip())
-        elif out == "print":
-            print threading.current_thread() 
-            print "Motor SEND: %s" % str(cmd).strip()       #for debug
-            print "Motor RECV: %s" % result.strip()    #for debug
+            if out == "display":
+                print threading.current_thread()
+                # print the time and date to the terminal
+                self.emit(QtCore.SIGNAL('apphistory(QString)'),
+                          time.strftime('%y-%m-%d %H:%M:%S'))
+                # send signal to writ to app history
+                self.emit(QtCore.SIGNAL('apphistory(QString)'),
+                          "Motor SEND: %s" % str(cmd).strip())
+                # send signal to writ to app history
+                self.emit(QtCore.SIGNAL('apphistory(QString)'),
+                          "Motor RECV: %s" % str(result).strip())
+            elif out == "print":
+                print threading.current_thread()
+                print "Motor SEND: %s" % str(cmd).strip()       # for debug
+                print "Motor RECV: %s" % result.strip()    # for debug
 
 # Start Motor
     def motor_start(self, cmds):
         global motor_on
         motor_out = ""
-        print threading.current_thread() 
+        motor_in = ""
+        print threading.current_thread()
         while len(cmds) >= 1:
             # run_cmd = str(cmds[0]).strip() + "\r"
             # self.motor_ser.open()           # open the serial port
             # self.motor_ser.write(run_cmd)
             # result = self.motor_ser.readline()
             # self.motor_ser.close()          # close the serial port
-            #print run_cmd
+            # print run_cmd
             #  print result
             self.motor_cmd(cmds[0])
             cmds.pop(0)
@@ -547,21 +529,31 @@ class APP(LaserGUI.gui):
 
             with lock:    # for threading to prevent issues
                 self.motor_ser.open()
+                tim = time.time()
+                print "tim", tim
                 while motor_out == "" and motor_on:
                     motor_out = self.motor_ser.read()
                     # motor_out = self.motor_ser.readline(None, '\r')
                     motor_out = motor_out.strip()
                     # print "motor_out: ", motor_out, motor_on
+                    if time.time() >= tim + AllGuiVars["spd"] + 0.5:
+                        print "break"
+                        break
                 self.motor_ser.close()
-
-            if motor_out == "f" and motor_on:
-                self.motor_cmd("FL-5236")
-                self.motor_cmd("SSb")
-                motor_out = ""
-            elif motor_out == "b" and motor_on:
-                self.motor_cmd("FL5236")
-                self.motor_cmd("SSf")
-                motor_out = ""
+            if ((motor_out == "" and motor_in == "b") or
+                (motor_out == "f" and motor_on)):
+                    self.motor_cmd("VE%s" % AllGuiVars["spd"])
+                    self.motor_cmd("FL-3600")
+                    self.motor_cmd("SSb")
+                    motor_in = motor_out
+                    motor_out = ""
+            elif ((motor_out == "" and motor_in == "f") or
+                  (motor_out == "b" and motor_on)):
+                    self.motor_cmd("VE%s" % AllGuiVars["spd"])
+                    self.motor_cmd("FL3600")
+                    self.motor_cmd("SSf")
+                    motor_in = motor_out
+                    motor_out = ""
 
         # stop kill add if we want to stop the motor instantly
         # self.motor_cmd("SK")
