@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import sys  # list of comand line argus need to run Gui
-# import serial             # will error if not connected to laser and motor
-import fakeSerial as serial           # use this if not connected to serial
+import serial             # will error if not connected to laser and motor
+# import fakeSerial as serial           # use this if not connected to serial
 import LaserGUI
 import time        # yep importing time that way we can go back to the future
 import threading
@@ -138,7 +138,9 @@ class APP(LaserGUI.gui):
 # ##             Update variables     #####
     def up_motor(self):
         global AllGuiVars
-        AllGuiVars["spd"] = self.motor_spd.value()*36/11
+        spd = self.motor_spd.value()
+        if spd != 0:
+            AllGuiVars["spd"] = round(spd*36/11,3)
 
     def up_EGY(self, val=1, send=True):  # val =place holder for val from box
         global AllGuiVars
@@ -536,18 +538,19 @@ class APP(LaserGUI.gui):
                     # motor_out = self.motor_ser.readline(None, '\r')
                     motor_out = motor_out.strip()
                     # print "motor_out: ", motor_out, motor_on
-                    if time.time() >= tim + AllGuiVars["spd"] + 0.5:
+                    if time.time() >= tim + (1.0/AllGuiVars["spd"])*(36/11.0) + 0.5:
                         print "break"
                         break
+                print "next"
                 self.motor_ser.close()
-            if ((motor_out == "" and motor_in == "b") or
+            if ((motor_out == "" and motor_in == "b" and motor_on) or
                 (motor_out == "f" and motor_on)):
                     self.motor_cmd("VE%s" % AllGuiVars["spd"])
                     self.motor_cmd("FL-3600")
                     self.motor_cmd("SSb")
                     motor_in = motor_out
                     motor_out = ""
-            elif ((motor_out == "" and motor_in == "f") or
+            elif ((motor_out == "" and motor_in == "f" and motor_on) or
                   (motor_out == "b" and motor_on)):
                     self.motor_cmd("VE%s" % AllGuiVars["spd"])
                     self.motor_cmd("FL3600")

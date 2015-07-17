@@ -184,12 +184,12 @@ class gui(QtGui.QMainWindow):
 ################
     #Motor Control stuff
         self.motor_spd = QtGui.QDoubleSpinBox()
-        self.motor_spd.setRange(0,5)
-        self.motor_spd.setSingleStep(0.25)
-        self.motor_spd.setValue(0.25)
+        self.motor_spd.setRange(0.01,1)
+        self.motor_spd.setSingleStep(0.01)
+        self.motor_spd.setValue(0.1)
         self.motor_spd.setObjectName("spd")
         self.spdLb= QtGui.QLabel()
-        self.spdLb.setText(_fromUtf8("Motor Speed [AU]:"))
+        self.spdLb.setText(_fromUtf8("Motor Speed [rev/sec]:"))
         self.motor_spd.setToolTip('Motor is setup to jog back and forth at the desired speed.')
         self.spdLb.setFont(font_L)
         #Button
