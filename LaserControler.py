@@ -140,7 +140,7 @@ class APP(LaserGUI.gui):
         global AllGuiVars
         spd = self.motor_spd.value()
         if spd != 0:
-            AllGuiVars["spd"] = round(spd*36/11,3)
+            AllGuiVars["spd"] = round(spd*36/11, 3)
 
     def up_EGY(self, val=1, send=True):  # val =place holder for val from box
         global AllGuiVars
@@ -193,7 +193,7 @@ class APP(LaserGUI.gui):
             self.laser_cmd('MODE=EGY NGR')
             iterations = 0
             i = 0
-            self.chck_on()  # start laser continue ifs on
+            self.PLID_loop(iterations, i)  # start laser continue ifs on
     # Laser NRG Controlled
         elif laser_on == "NRG":
             self.laser_cmd('MODE=EGY NGR')
@@ -337,9 +337,9 @@ class APP(LaserGUI.gui):
     def PLID_loop(self, iterations, i):
         global laser_on
         global AllGuiVars
-        if i < 3:
+        if i <= 3:   # advance until =3 i.e frq3...
             i += 1
-        elif i == 3:
+        elif i == 4:
             i = 1
             iterations += 1
             print "it: %d" % iterations
@@ -348,20 +348,25 @@ class APP(LaserGUI.gui):
         print AllGuiVars["sec" + str(i)]
         stop = time.time() + int(AllGuiVars["sec" + str(i)])
         # print "Stop: %s" %str(stop)
+        self.laser_cmd('REPRATE=%d' % AllGuiVars["frq" + str(i)])
+        self.laser_cmd('EGY=%d' % AllGuiVars["NRG" + str(i)])
+        QtGui.QApplication.processEvents()
+        num = 0
         while True:
-            self.laser_cmd('REPRATE=%d' % AllGuiVars["frq" + str(i)])
-            self.laser_cmd('EGY=%d' % AllGuiVars["NRG" + str(i)])
-            QtGui.QApplication.processEvents()
+            self.laser_run_check(speed=-1, num=num)
+            num += 1
+            if num == 5:
+                num = 0
             if time.time() >= stop:      # break and continue to next it
                 break
             elif laser_on == "":       # stop on button press
                 break
             else:
                 QtGui.QApplication.processEvents()
-                time.sleep(0.01)  # this plus below sets the iteration acuracy
-                # print "PLID inner" + str(time.time())  # learn how long take
+            # time.sleep(0.01)  # this plus below sets the iteration acuracy
+            # print "PLID inner" + str(time.time())  # learn how long take
 
-        # if max itts reached of stop has been issued (laser_on changed to "")
+        # if max itts reached of stop has been issued (laser_on changed to ""
         if iterations == AllGuiVars["reps"] or laser_on == "":
             self.laser_stop()
             return
@@ -435,6 +440,9 @@ class APP(LaserGUI.gui):
                 3: self.laser_act_volt.display,
                 4: self.laser_OP_check,
                 5: self.laser_messages.setPlainText}
+        if speed = -1:
+            func[num](self.laser_cmd(cmd[num]))
+            return
         if laser_on != "":
             num = use[0]
             use.append(use.pop(0))
@@ -538,25 +546,26 @@ class APP(LaserGUI.gui):
                     # motor_out = self.motor_ser.readline(None, '\r')
                     motor_out = motor_out.strip()
                     # print "motor_out: ", motor_out, motor_on
-                    if time.time() >= tim + (1.0/AllGuiVars["spd"])*(36/11.0) + 0.5:
+                    if (time.time() >= tim + (1.0 / AllGuiVars["spd"]) *
+                            (36/11.0) + 0.5):
                         print "break"
                         break
                 print "next"
                 self.motor_ser.close()
             if ((motor_out == "" and motor_in == "b" and motor_on) or
-                (motor_out == "f" and motor_on)):
-                    self.motor_cmd("VE%s" % AllGuiVars["spd"])
-                    self.motor_cmd("FL-3600")
-                    self.motor_cmd("SSb")
-                    motor_in = motor_out
-                    motor_out = ""
+                    (motor_out == "f" and motor_on)):
+                self.motor_cmd("VE%s" % AllGuiVars["spd"])
+                self.motor_cmd("FL-3600")
+                self.motor_cmd("SSb")
+                motor_in = motor_out
+                motor_out = ""
             elif ((motor_out == "" and motor_in == "f" and motor_on) or
-                  (motor_out == "b" and motor_on)):
-                    self.motor_cmd("VE%s" % AllGuiVars["spd"])
-                    self.motor_cmd("FL3600")
-                    self.motor_cmd("SSf")
-                    motor_in = motor_out
-                    motor_out = ""
+                    (motor_out == "b" and motor_on)):
+                self.motor_cmd("VE%s" % AllGuiVars["spd"])
+                self.motor_cmd("FL3600")
+                self.motor_cmd("SSf")
+                motor_in = motor_out
+                motor_out = ""
 
         # stop kill add if we want to stop the motor instantly
         # self.motor_cmd("SK")
