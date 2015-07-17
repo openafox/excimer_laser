@@ -193,7 +193,19 @@ class APP(LaserGUI.gui):
             self.laser_cmd('MODE=EGY NGR')
             iterations = 0
             i = 0
-            self.PLID_loop(iterations, i)  # start laser continue ifs on
+            self.laser_cmd('REPRATE=%d' % AllGuiVars["frq1"])
+            self.laser_cmd('EGY=%d' % AllGuiVars["NRG1"])
+            out = self.laser_cmd('OPMODE=ON')
+            while True:
+                QtGui.QApplication.processEvents()
+                out = self.laser_cmd('OPMODE?')
+                if out[0:4] == "OFF:":
+                    super(APP, self).ChangeButton(laser_on, "Stop")
+                    laser_on = ""
+                    return
+                elif out[0:2] == "ON":
+                    self.PLID_loop(iterations, i)
+                    return
     # Laser NRG Controlled
         elif laser_on == "NRG":
             self.laser_cmd('MODE=EGY NGR')
@@ -339,7 +351,7 @@ class APP(LaserGUI.gui):
         global AllGuiVars
         if i <= 3:   # advance until =3 i.e frq3...
             i += 1
-        elif i == 4:
+        if i == 4:
             i = 1
             iterations += 1
             print "it: %d" % iterations
@@ -353,6 +365,7 @@ class APP(LaserGUI.gui):
         QtGui.QApplication.processEvents()
         num = 0
         while True:
+            print "run", num
             self.laser_run_check(speed=-1, num=num)
             num += 1
             if num == 5:
@@ -360,20 +373,21 @@ class APP(LaserGUI.gui):
             if time.time() >= stop:      # break and continue to next it
                 break
             elif laser_on == "":       # stop on button press
-                break
+                self.laser_stop()
+                return
             else:
                 QtGui.QApplication.processEvents()
             # time.sleep(0.01)  # this plus below sets the iteration acuracy
             # print "PLID inner" + str(time.time())  # learn how long take
 
         # if max itts reached of stop has been issued (laser_on changed to ""
-        if iterations == AllGuiVars["reps"] or laser_on == "":
+        if iterations == AllGuiVars["reps"] and i == 3 or laser_on == "":
             self.laser_stop()
             return
         else:
             print "Main Laser " + str(time.time())  # learn how long this take
             QtCore.QTimer.singleShot(
-                    10, lambda: self.laser_loop(iterations, i))
+                    10, lambda: self.PLID_loop(iterations, i))
 
 # Turn the laser on and check the on status of the laser
     def chck_on(self):
@@ -440,7 +454,7 @@ class APP(LaserGUI.gui):
                 3: self.laser_act_volt.display,
                 4: self.laser_OP_check,
                 5: self.laser_messages.setPlainText}
-        if speed = -1:
+        if speed == -1:
             func[num](self.laser_cmd(cmd[num]))
             return
         if laser_on != "":
