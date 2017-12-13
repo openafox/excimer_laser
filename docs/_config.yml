@@ -1,0 +1,57 @@
+# Head Info
+head:
+  title: Openafox
+  tagline: "Austin Fox's personal website."
+  description: 'A place for Austin to collect his thoughts and share them with the world.'
+  headurl: http://openafox.com 
+  logo: '/public/logo.png'
+
+# Site Info
+logo: ''
+title: Excimer Laser Controller
+tagline: "Project site for excimer_laser"
+description: 'Stuff.'
+github:    https://github.com/openafox/excimer_laser
+
+baseurl: "/excimer_laser"
+url: http://openafox.com/put_app
+
+# Images
+images: "/excimer_laser/resources/img"
+
+# Site configurations
+plugins:
+  - jekyll-paginate
+markdown: kramdown
+kramdown:
+  input: GFM
+excerpt_separator: "<!-- more -->"
+sass:
+  style: compressed
+  sass_dir: _scss    
+paginate: 5
+paginate_path: '/blog/page:num'
+permalink: none #/:categories/:title.html
+
+version: 1.0.0
+
+# Navigation (2nd level links supported)
+nav:
+  Home:           
+    - 'http://openafox.com/excimer_laser'
+  Info:           
+    - '/blog/'
+    - { Categories: '/blog/categories' }
+    - { Tags: '/blog/tags' }
+  Other GitHub Project Pages:          
+    - 'http://openafox.com/projects'
+
+# Where are tags and categories displayed
+tag_page: '/blog/tags'
+category_page: '/blog/categories'
+
+# Puglins
+mathjax: true # whether support mathjax
+google_analytics_token: UA-111193604-1 # leave blank if you don't want google analytics
+disqus_short_name: openafox # leave blank if you don't want disqus
+
