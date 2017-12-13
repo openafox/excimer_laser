@@ -3,7 +3,7 @@ layout: default
 title: Home
 ---
 
-# PLID_app
+# Excimer Laser Controller
 {: style="text-align: center;"}
 Controller for excimer laser - Pulsed Laser Iterative Deposition, Motor controller Python Multithreading for slow PC.
 
