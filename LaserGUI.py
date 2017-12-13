@@ -65,27 +65,27 @@ class gui(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QWidget.__init__(self)
         # could also use 'super(gui, self).__init__()' calls the parent class
-      
+
         self.setupUi(self)  # make the UI  See Bellow
 
     def setupUi(self, MainWindow):
-        
+
 # System Checks.  Avoid errors!!
-        if sys.platform=="darwin":  # check if you are on a mac 
+        if sys.platform=="darwin":  # check if you are on a mac
             QtGui.qt_mac_set_native_menubar(False)   # disable native menues
 
-# Set Up Widget(Form) 
+# Set Up Widget(Form)
     # set up size policy (Currently no using a size policy but left the below in incase I decide to add it)
         # sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         # sizePolicy.setHorizontalStretch(0)
         # sizePolicy.setVerticalStretch(0)
         # sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        
+
     # Setup Main Window
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         # MainWindow.setMaximumSize(100,100) #height, width
         # MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setWindowTitle("PLD Controller") 
+        MainWindow.setWindowTitle("PLD Controller")
 
         # central widget (widget "gui" of the main window)
         self.centralwidget = QtGui.QWidget(MainWindow)
@@ -167,7 +167,7 @@ class gui(QtGui.QMainWindow):
         self.grid.addWidget(self.laser_act_volt,2,2)
         self.grid.addWidget(self.LB5,2,3)
         self.grid.addWidget(self.laser_act_frq,2,4)
-        self.grid.addWidget(self.REButton,1,5,QtCore.Qt.AlignTop)        
+        self.grid.addWidget(self.REButton,1,5,QtCore.Qt.AlignTop)
         self.grid.addWidget(self.LB6,3,1)
         self.grid.addWidget(self.laser_messages,3,2,3,5)
         # row, col[,end row, end col(for multi grid)]
@@ -198,7 +198,7 @@ class gui(QtGui.QMainWindow):
         self.motor_button = QtGui.QPushButton("Start Motor")
         self.motor_button.resize(100, 60)
         self.motor_button.setFont(font_B)
-        self.motor_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor)) 
+        self.motor_button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.motor_button.setObjectName(_fromUtf8("Motor"))
         self.motor_button.setStyleSheet(ButtonStyle)
 
@@ -209,27 +209,27 @@ class gui(QtGui.QMainWindow):
         self.motorbox.addWidget(self.motor_button)
 # ##############
 # Set up buttion actions and changes (Button Click is defined below)
-        self.motor_button.clicked.connect(lambda: self.ButtonClick())          
+        self.motor_button.clicked.connect(lambda: self.ButtonClick())
         self.NRG.Button.clicked.connect(lambda: self.ButtonClick())
-        self.Volt.Button.clicked.connect(lambda: self.ButtonClick())  
-        self.PLID.Button.clicked.connect(lambda: self.ButtonClick())  
-        self.Setup.FillBt.clicked.connect(lambda: self.ButtonClick())  
-        self.Setup.CalBt.clicked.connect(lambda: self.ButtonClick())  
-        self.Setup.PResBt.clicked.connect(lambda: self.ButtonClick())  
-        self.Setup.PlinBt.clicked.connect(lambda: self.ButtonClick())  
-        self.Setup.FlushBt.clicked.connect(lambda: self.ButtonClick())  
-            
+        self.Volt.Button.clicked.connect(lambda: self.ButtonClick())
+        self.PLID.Button.clicked.connect(lambda: self.ButtonClick())
+        self.Setup.FillBt.clicked.connect(lambda: self.ButtonClick())
+        self.Setup.CalBt.clicked.connect(lambda: self.ButtonClick())
+        self.Setup.PResBt.clicked.connect(lambda: self.ButtonClick())
+        self.Setup.PlinBt.clicked.connect(lambda: self.ButtonClick())
+        self.Setup.FlushBt.clicked.connect(lambda: self.ButtonClick())
+
 
 
 # ###############
 # Setup Main Layout
 
     # Set up stack (this allows for the switching between pages egy cont, volt cont, etc.)
-        self.stack.addWidget(self.NRG)  
-        self.stack.addWidget(self.Volt) 
-        self.stack.addWidget(self.PLID) 
-        self.stack.addWidget(self.Setup) 
-        self.stack.addWidget(self.Terminal) 
+        self.stack.addWidget(self.NRG)
+        self.stack.addWidget(self.Volt)
+        self.stack.addWidget(self.PLID)
+        self.stack.addWidget(self.Setup)
+        self.stack.addWidget(self.Terminal)
 
     # create vertical layout
         self.layoutV = QtGui.QVBoxLayout(self.centralwidget)
@@ -238,9 +238,9 @@ class gui(QtGui.QMainWindow):
         self.layoutV.addLayout(self.motorbox)   # motor controlls
         self.layoutV.addWidget(self.NoteLabel)
         self.layoutV.addWidget(self.Note)
-    # add to main window to display 
+    # add to main window to display
         MainWindow.setCentralWidget(self.centralwidget)
-        
+
 # Add program Status Bar at bottom
         self.statusbar = QtGui.QStatusBar(MainWindow)
         MainWindow.setStatusBar(self.statusbar)
@@ -251,8 +251,8 @@ class gui(QtGui.QMainWindow):
         self.page0 = QtGui.QAction(QtGui.QIcon('img/NRG.png'), '  Energy', self)  # set up the action
         self.page0.triggered.connect(lambda: self.stack.setPage(0))         #On click do...
         self.page0.setShortcut('Ctrl+1')    # give it a shortcut
-       
-       
+
+
         self.page1 = QtGui.QAction(QtGui.QIcon('img/Volt.png'), '  Voltage', self)  # set up the action
         self.page1.triggered.connect(lambda: self.stack.setPage(1))         #On click do...
         self.page1.setShortcut('Ctrl+2')    # give it a shortcut
@@ -264,7 +264,7 @@ class gui(QtGui.QMainWindow):
         self.page3 = QtGui.QAction(QtGui.QIcon('img/Setup.png'), '  Setup', self)  # set up the action
         self.page3.triggered.connect(lambda: self.stack.setPage(3))         #On click do...
         self.page3.setShortcut('Ctrl+4')    # give it a shortcut
-        
+
         self.page4 = QtGui.QAction(QtGui.QIcon('img/Terminal.png'), '  Terminal', self)  # set up the action
         self.page4.triggered.connect(lambda: self.stack.setPage(4))         #On click do...
         self.page4.setShortcut('Ctrl+5')    # give it a shortcut
@@ -285,7 +285,7 @@ class gui(QtGui.QMainWindow):
         sending_button = self.sender()
         name = sending_button.objectName()
         self.ChangeButton(name)
-    
+
     def ChangeButton(self, name, chk=""):
     # what button sent the command??
         sending_button = self.findChild(QtGui.QPushButton, name)
@@ -324,7 +324,7 @@ class gui(QtGui.QMainWindow):
 
 
 # ####################################################
-# ####################################################	
+# ####################################################
 # Setup Basic Gui Page that will be inherited by others (Lowers amount of code)
 class Basic(QtGui.QWidget):
     def __init__(self):
@@ -345,7 +345,7 @@ class Basic(QtGui.QWidget):
         self.hz.setRange(0,30)
         self.hz.setSingleStep(1)
         self.hz.setValue(10)
-        # self.hz.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))     
+        # self.hz.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
         self.Label2 = QtGui.QLabel()
         self.Label2.setText(_fromUtf8("Frequency [Hz]:"))
         self.hz.setToolTip(_fromUtf8('Please input an integer between 0 and 20'))
@@ -356,7 +356,7 @@ class Basic(QtGui.QWidget):
         self.Button.setFont(font_B)
         self.Button.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.Button.setStyleSheet(ButtonStyle)
-        
+
 # ####################################################
 # Setup Energy Controlled Page
 class NRG(Basic):  # inherit from basic class above
@@ -390,7 +390,7 @@ class NRG(Basic):  # inherit from basic class above
         self.vbox.addWidget(self.Button)
     # Finish Page Setup
         self.setLayout(self.vbox)
-# ####################################################	
+# ####################################################
 # Setup Voltage Controlled Page
 class Volt(Basic): # inherit from basic class above
     def __init__(self):
@@ -427,7 +427,7 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         super(PLID, self).__init__()
         self.setupUi()  # make the UI  See Bellow
         self.initUi()
-  
+
     def  setupUi(self):
         # Setup Title
         self.Title = QtGui.QLabel()
@@ -451,8 +451,8 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.VLab4.setFont(font_L)
         self.VLab4.setText(_fromUtf8("Time [s]:"))
 
-                
-        # horizontal lables    
+
+        # horizontal lables
         self.Lab1 = QtGui.QLabel()
         self.Lab1.setFont(font_L)
         self.Lab1.setText(_fromUtf8("Iteration 1:"))
@@ -480,13 +480,13 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.NRG3 = QtGui.QSpinBox()
         self.NRG3.setRange(0,400)
         self.NRG3.setSingleStep(25)
- 	
+
         # hz1 input
         self.frq1 = QtGui.QSpinBox()
         self.frq1.setRange(0,30)
         self.frq1.setSingleStep(1)
         self.frq1.setValue(10)
-        self.frq1.valueChanged.connect(lambda: self.reps_and_time("Reps")) 
+        self.frq1.valueChanged.connect(lambda: self.reps_and_time("Reps"))
 
         # hz3 input
         self.frq2 = QtGui.QSpinBox()
@@ -499,14 +499,14 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.frq3 = QtGui.QSpinBox()
         self.frq3.setRange(0, 30)
         self.frq3.setSingleStep(1)
-        self.frq3.valueChanged.connect(lambda: self.reps_and_time("Reps")) 
+        self.frq3.valueChanged.connect(lambda: self.reps_and_time("Reps"))
 
         # time1 input
         self.sec1 = QtGui.QDoubleSpinBox()
         self.sec1.setRange(0,300)
         self.sec1.setSingleStep(0.5)
         self.sec1.setValue(2)
-        self.sec1.valueChanged.connect(lambda: self.reps_and_time("Reps")) 
+        self.sec1.valueChanged.connect(lambda: self.reps_and_time("Reps"))
 
         # time3 input
         self.sec2 = QtGui.QDoubleSpinBox()
@@ -519,7 +519,7 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.sec3 = QtGui.QDoubleSpinBox()
         self.sec3.setRange(0,300)
         self.sec3.setSingleStep(0.5)
-        self.sec3.valueChanged.connect(lambda: self.reps_and_time("Reps")) 
+        self.sec3.valueChanged.connect(lambda: self.reps_and_time("Reps"))
 
         # Time total input
         self.Time = QtGui.QDoubleSpinBox()
@@ -530,7 +530,7 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.TimeLb.setFont(font_L)
         self.TimeLb.setText(_fromUtf8("Total Run Time [min]:"))
         self.Time.setObjectName(_fromUtf8("Time"))
-        self.Time.valueChanged.connect(lambda:self.reps_and_time("Time")) 
+        self.Time.valueChanged.connect(lambda:self.reps_and_time("Time"))
 
         # Total Reps input
         self.reps = QtGui.QSpinBox()
@@ -540,8 +540,8 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.repsLb.setFont(font_L)
         self.repsLb.setText(_fromUtf8("Total Repititions:"))
         self.reps.setObjectName(_fromUtf8("Reps"))
-        self.reps.valueChanged.connect(lambda: self.reps_and_time("Reps")) 
-        
+        self.reps.valueChanged.connect(lambda: self.reps_and_time("Reps"))
+
         # Calculated Total Pulses
         self.pulses = QtGui.QLCDNumber()
         self.pulses.setSegmentStyle(QtGui.QLCDNumber.Flat)
@@ -612,8 +612,8 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         self.vbox.addWidget(self.Button)
     # Finish Page Setup
         self.setLayout(self.vbox)
-    
-# PLID reps buttons (make time and reps connected)    
+
+# PLID reps buttons (make time and reps connected)
     def reps_and_time(self,name):
         sec1 = self.sec1.value()
         sec2 = self.sec2.value()
@@ -622,7 +622,7 @@ class PLID(QtGui.QWidget):  # inherit from regular widget
         hz1 = self.frq1.value()
         hz2 = self.frq2.value()
         hz3 = self.frq2.value()
-        reps = self.reps.value() 
+        reps = self.reps.value()
 
         if name == "Reps":
             self.Time.setValue((reps * total) / 60)
@@ -638,7 +638,7 @@ class Setup(QtGui.QWidget): # inherit from regular widget
         super(Setup, self).__init__()
         self.setupUi()  # make the UI  See Bellow
         self.initUi()
-  
+
     def  setupUi(self):
         # Setup Title
         self.Title = QtGui.QLabel()
@@ -656,31 +656,31 @@ class Setup(QtGui.QWidget): # inherit from regular widget
         self.FlushBt = QtGui.QPushButton("Flush Line (Evacuate Line for 2 sec)")
         self.FlushBt.resize(100, 60)
         self.FlushBt.setFont(font_B)
-        self.FlushBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor)) 
+        self.FlushBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.FlushBt.setObjectName('Flush')
         self.FlushBt.setStyleSheet(ButtonStyle)
         # Purge Line Button
         self.PlinBt = QtGui.QPushButton("Purge Line (Flush and Fill Line With Inert Gas)")
         self.PlinBt.resize(100, 60)
         self.PlinBt.setFont(font_B)
-        self.PlinBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor)) 
+        self.PlinBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.PlinBt.setObjectName('Pline')
         self.PlinBt.setStyleSheet(ButtonStyle)
         # Purge Resevoir Button
         self.PResBt = QtGui.QPushButton("Purge Reservoir")
         self.PResBt.resize(100, 60)
         self.PResBt.setFont(font_B)
-        self.PResBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor)) 
+        self.PResBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.PResBt.setObjectName('PRes')
-        self.PResBt.setStyleSheet(ButtonStyle)  
+        self.PResBt.setStyleSheet(ButtonStyle)
         # Calibration Button
         self.CalBt = QtGui.QPushButton("Energy Calibration")
         self.CalBt.resize(100, 60)
         self.CalBt.setFont(font_B)
-        self.CalBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor)) 
+        self.CalBt.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.CalBt.setObjectName('Cal')
         self.CalBt.setStyleSheet(ButtonStyle)
-        
+
     def  initUi(self):
         # Setup Vertical Box Layout<F3>
         self.vbox = QtGui.QVBoxLayout()
@@ -701,7 +701,7 @@ class Terminal(QtGui.QWidget):  # inherit from basic class above
         super(Terminal, self).__init__()
         self.setupUi()  # make the UI  See Bellow
         self.initUi()
-  
+
     def  setupUi(self):
         # Setup Title
         self.Title = QtGui.QLabel()
@@ -723,12 +723,12 @@ class Terminal(QtGui.QWidget):  # inherit from basic class above
         # self.laser_send.resize(10, 60)
         self.laser_send.setFont(font_B)
         self.laser_send.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.laser_send.setStyleSheet(ButtonStyle) 
+        self.laser_send.setStyleSheet(ButtonStyle)
         # Motor Button
         self.motor_send = QtGui.QPushButton("Send to Motor")
         # self.motor_send.resize(100, 60)
         self.motor_send.setFont(font_B)
-        self.motor_send.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor)) 
+        self.motor_send.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.motor_send.setStyleSheet(ButtonStyle)
         # Clear History Button
         self.hist_clear = QtGui.QPushButton("Clear History")
@@ -736,7 +736,7 @@ class Terminal(QtGui.QWidget):  # inherit from basic class above
         self.hist_clear.setFont(font_B)
         self.hist_clear.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.hist_clear.setStyleSheet(ButtonStyle)
-        
+
         # history text box
         self.hist = QtGui.QTextEdit()
         self.hist.setReadOnly(True)
@@ -771,34 +771,34 @@ class Terminal(QtGui.QWidget):  # inherit from basic class above
 
 
 # ####################################################
-# Setup for fading between 'stacked' widgets. 
+# Setup for fading between 'stacked' widgets.
 # (advanced and totally extra - not really needed but fun - I could comment/explain if wanted)
 class FaderWidget(QtGui.QWidget):
 
     def __init__(self, old_widget, new_widget):
         # print old_widget, new_widget #for debug
         QtGui.QWidget.__init__(self, new_widget)
-        
+
         self.old_pixmap = QtGui.QPixmap(new_widget.size())
         old_widget.render(self.old_pixmap)
         self.pixmap_opacity = 1.0
-        
+
         self.timeline = QtCore.QTimeLine()
         self.timeline.valueChanged.connect(self.animate)
         self.timeline.finished.connect(self.close)
         self.timeline.setDuration(333)
         self.timeline.start()
-        
+
         self.resize(new_widget.size())
         self.show()
-    
+
     def paintEvent(self, event):
         painter = QtGui.QPainter()
         painter.begin(self)
         painter.setOpacity(self.pixmap_opacity)
         painter.drawPixmap(0, 0, self.old_pixmap)
         painter.end()
-    
+
     def animate(self, value):
         self.pixmap_opacity = 1.0 - value
         self.repaint()
@@ -811,9 +811,9 @@ class StackedWidget(QtGui.QStackedWidget):
     def setCurrentIndex(self, index):
         self.fader_widget = FaderWidget(self.currentWidget(), self.widget(index))
         QtGui.QStackedWidget.setCurrentIndex(self, index)
-    
-    def setPage(self, index=0): 
-        self.setCurrentIndex(index)    
+
+    def setPage(self, index=0):
+        self.setCurrentIndex(index)
 
 # ############################################
 # # Start up the Gui

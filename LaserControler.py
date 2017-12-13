@@ -1,7 +1,7 @@
 from PyQt4 import QtCore, QtGui
 import sys  # list of comand line argus need to run Gui
 import serial             # will error if not connected to laser and motor
-# import fakeSerial as serial           # use this if not connected to serial
+import fakeSerial as serial           # use this if not connected to serial
 import LaserGUI
 import time        # yep importing time that way we can go back to the future
 import threading
