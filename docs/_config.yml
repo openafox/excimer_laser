@@ -14,7 +14,7 @@ description: 'Stuff.'
 github:    https://github.com/openafox/excimer_laser
 
 baseurl: "/excimer_laser"
-url: http://openafox.com/put_app
+url: http://openafox.com/excimer_laser
 
 # Images
 images: "/excimer_laser/resources/img"
